@@ -5,11 +5,10 @@
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  @flow
  */
 
-import type { Uri } from 'graphql-language-service-types';
-import type { WatchmanCommandResponse } from '../GraphQLWatchman';
+import { Uri } from 'graphql-language-service-types';
+import { WatchmanCommandResponse } from '../GraphQLWatchman';
 
 class MockWatchmanClient {
   checkVersion(): Promise<void> {
@@ -17,17 +16,17 @@ class MockWatchmanClient {
   }
 
   listFiles(
-    entryPath: Uri,
-    options?: { [name: string]: any } = {},
+    _entryPath: Uri,
+    _options: { [name: string]: any } = {},
   ): Promise<Array<any>> {
     return Promise.resolve([]);
   }
 
-  runCommand(...args: Array<any>): Promise<any> {
+  runCommand(..._args: Array<any>): Promise<any> {
     return Promise.resolve();
   }
 
-  watchProject(directoryPath: Uri): Promise<WatchmanCommandResponse> {
+  watchProject(_directoryPath: Uri): Promise<WatchmanCommandResponse> {
     return Promise.resolve({
       version: '',
       relative_path: '',
@@ -36,11 +35,14 @@ class MockWatchmanClient {
     });
   }
 
-  subscribe(entryPath: Uri, callback: (result: Object) => void): Promise<void> {
+  subscribe(
+    _entryPath: Uri,
+    _callback: (result: Object) => void,
+  ): Promise<void> {
     return Promise.resolve();
   }
 
   dispose(): void {}
 }
 
-export default (MockWatchmanClient: any);
+export default MockWatchmanClient;

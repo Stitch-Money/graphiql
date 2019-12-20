@@ -5,7 +5,6 @@
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  @flow
  */
 
 import { Position, Range } from 'graphql-language-service-utils';
@@ -13,9 +12,12 @@ import { Position, Range } from 'graphql-language-service-utils';
 import { MessageProcessor, getQueryAndRange } from '../MessageProcessor';
 import MockWatchmanClient from '../__mocks__/MockWatchmanClient';
 import { GraphQLConfig } from 'graphql-config';
+import { CompletionItem } from 'graphql-language-service-types';
+import { CompletionList } from 'vscode-languageserver';
 
 describe('MessageProcessor', () => {
   const mockWatchmanClient = new MockWatchmanClient();
+  // @ts-ignore
   const messageProcessor = new MessageProcessor(undefined, mockWatchmanClient);
 
   const queryDir = `${__dirname}/__queries__`;
@@ -50,10 +52,14 @@ describe('MessageProcessor', () => {
       handleWatchmanSubscribeEvent() {},
     };
     messageProcessor._languageService = {
-      getAutocompleteSuggestions: (query, position, uri) => {
+      getAutocompleteSuggestions: (
+        query: string,
+        _position: string,
+        uri: string,
+      ) => {
         return [{ label: `${query} at ${uri}` }];
       },
-      getDiagnostics: (query, uri) => {
+      getDiagnostics: () => {
         return [];
       },
     };
@@ -136,8 +142,10 @@ describe('MessageProcessor', () => {
     // Should throw because file has been deleted from cache
     return messageProcessor
       .handleCompletionRequest(params)
-      .then(result => expect(result).toEqual(null))
-      .catch(error => {});
+      .then((result: CompletionItem | CompletionList) =>
+        expect(result).toEqual(null),
+      )
+      .catch(() => {});
   });
 
   // Doesn't work with mock watchman client
@@ -174,7 +182,7 @@ describe('MessageProcessor', () => {
     const config = new GraphQLConfig(
       {
         schemaPath,
-        includes: `${queryDir}/*.graphql`,
+        includes: [`${queryDir}/*.graphql`],
       },
       'not/a/real/config',
     );
@@ -185,10 +193,11 @@ describe('MessageProcessor', () => {
   it('loads configs with projects when watchman is present', async () => {
     const config = new GraphQLConfig(
       {
+        schemaPath: '',
         projects: {
           foo: {
             schemaPath,
-            includes: `${queryDir}/*.graphql`,
+            includes: [`${queryDir}/*.graphql`],
           },
         },
       },
